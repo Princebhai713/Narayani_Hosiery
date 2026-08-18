@@ -68,6 +68,12 @@ button {
   padding: 0 24px;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 4px !important;
+  }
+}
+
 /* Typography Helpers */
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
