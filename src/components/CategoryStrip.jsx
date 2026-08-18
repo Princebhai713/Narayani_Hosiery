@@ -1,16 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './CategoryStrip.css';
+import ImageLoader from './ImageLoader';
 
 const CATEGORIES = [
-  { name: "All", icon: "/category-images/1st_Catogary.png" },
-  { name: "Kids Wear", icon: "/category-images/2nd_catogary.png" },
-  { name: "Mens Innerwear", icon: "/category-images/3rd_Catogary.png" },
-  { name: "Womens Hosiery", icon: "/category-images/4th_Catogary.png" },
-  { name: "Readymade", icon: "/category-images/5th_Catogary.png" },
-  { name: "Winter Wear", icon: "/category-images/6th_Catogary.png" },
-  { name: "Nightwear", icon: "/category-images/7th_Catogary.png" },
-  { name: "Socks", icon: "/category-images/8th_Catogary.png" },
-  { name: "Accessories", icon: "/category-images/9th_Catogary.png" }
+  { name: "All", icon: "/category-images/1st_Catogary.webp" },
+  { name: "Kids Wear", icon: "/category-images/2nd_catogary.webp" },
+  { name: "Mens Innerwear", icon: "/category-images/3rd_Catogary.webp" },
+  { name: "Womens Hosiery", icon: "/category-images/4th_Catogary.webp" },
+  { name: "Readymade", icon: "/category-images/5th_Catogary.webp" },
+  { name: "Winter Wear", icon: "/category-images/6th_Catogary.webp" },
+  { name: "Nightwear", icon: "/category-images/7th_Catogary.webp" },
+  { name: "Socks", icon: "/category-images/8th_Catogary.webp" },
+  { name: "Accessories", icon: "/category-images/9th_Catogary.webp" }
 ];
 
 function CategoryStrip({ activeCategory, onSelectCategory }) {
@@ -106,7 +107,12 @@ function CategoryStrip({ activeCategory, onSelectCategory }) {
               >
                 <div className="category-icon-wrapper">
                   <div className="category-icon">
-                    <img src={cat.icon} alt={cat.name} loading={idx < 5 ? "eager" : "lazy"} />
+                    <ImageLoader 
+                      src={cat.icon} 
+                      alt={cat.name} 
+                      width={40} 
+                      height={40} 
+                    />
                   </div>
                 </div>
                 <span className="category-name">{cat.name}</span>

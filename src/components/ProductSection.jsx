@@ -1,7 +1,13 @@
 import React, { useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
+import ImageLoader from './ImageLoader';
 import './ProductSection.css';
+
+const optimizeCloudinaryUrl = (url) => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  return url.replace('/upload/', '/upload/c_scale,w_400,f_auto,q_auto/');
+};
 
 function ProductSection({ title, products, onViewAll, isGridView }) {
   const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
@@ -29,7 +35,7 @@ function ProductSection({ title, products, onViewAll, isGridView }) {
 
       <div className="product-scroll-container">
         {!isGridView && (
-          <button className="scroll-btn left" onClick={() => scroll('left')}>❮</button>
+          <button className="scroll-btn left" onClick={() => scroll('left')} aria-label="Scroll left">❮</button>
         )}
         
         <div className={`product-grid ${isGridView ? 'grid-view' : ''}`} ref={scrollRef}>
@@ -38,7 +44,12 @@ function ProductSection({ title, products, onViewAll, isGridView }) {
             return (
               <div key={product.id} className="product-card">
                 <Link to={`/product/${product.id}/${slug}`} className="product-image">
-                  <img src={product.images[0]} alt={product.name} />
+                  <ImageLoader 
+                    src={optimizeCloudinaryUrl(product.images[0])} 
+                    alt={product.name} 
+                    width={168} 
+                    height={168} 
+                  />
                 </Link>
                 <div className="product-details">
                   <Link to={`/product/${product.id}/${slug}`}>
@@ -62,11 +73,13 @@ function ProductSection({ title, products, onViewAll, isGridView }) {
                             if (newQty <= 0) removeFromCart(product.id);
                             else updateQuantity(product.id, newQty);
                           }}
+                          aria-label="Decrease quantity"
                         >-</button>
                         <span className="qty-display">{cartItem.quantity}</span>
                         <button 
                           className="qty-btn"
                           onClick={() => updateQuantity(product.id, cartItem.quantity + product.moq)}
+                          aria-label="Increase quantity"
                         >+</button>
                       </div>
                     );
@@ -89,7 +102,7 @@ function ProductSection({ title, products, onViewAll, isGridView }) {
         </div>
         
         {!isGridView && (
-          <button className="scroll-btn right" onClick={() => scroll('right')}>❯</button>
+          <button className="scroll-btn right" onClick={() => scroll('right')} aria-label="Scroll right">❯</button>
         )}
       </div>
     </div>

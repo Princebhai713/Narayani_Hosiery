@@ -3,26 +3,44 @@ import CategoryStrip from '../components/CategoryStrip';
 import TrustBadges from '../components/TrustBadges';
 import ProductSection from '../components/ProductSection';
 import { useProducts } from '../context/ProductContext';
-import { DUMMY_PRODUCTS } from '../data/products'; // Fallback
 import './Home.css';
 
 function Home() {
   const { products: liveProducts, loading } = useProducts();
   const [activeCategory, setActiveCategory] = useState('All');
 
-  // Use live products if available, otherwise fallback to DUMMY_PRODUCTS
-  const displayProducts = liveProducts.length > 0 ? liveProducts : DUMMY_PRODUCTS;
+  const displayProducts = liveProducts;
 
-  // Select 10 random-looking products for the "For You" section
-  const forYouProducts = displayProducts.slice(10, 20); 
+  const topPickedProducts = displayProducts.filter(p => p.is_top_picked);
 
-  const kidsProducts = displayProducts.filter(p => p.category === "Kids Wear" || p.category === "Kids");
-  const innerwearProducts = displayProducts.filter(p => p.category === "Mens Innerwear" || p.category === "Innerwear");
-  const ladiesProducts = displayProducts.filter(p => p.category === "Womens Hosiery" || p.category === "Readymade" || p.category === "Ladies Hosiery");
+  const normalize = (cat) => (cat || "").trim().toLowerCase();
 
   const handleCategorySelect = (categoryName) => {
     setActiveCategory(categoryName);
   };
+
+  // Group products by their normalized categories to avoid spelling/spacing issues
+  const getProductsByCategory = (targetCategory) => {
+    const target = normalize(targetCategory);
+    return displayProducts.filter(p => {
+      const pCat = normalize(p.category);
+      if (target === 'ladies hosiery' || target === 'womens hosiery' || target === 'readymade') {
+         return pCat === 'womens hosiery' || pCat === 'ladies hosiery' || pCat === 'readymade';
+      }
+      if (target === 'kids wear' || target === 'kids') {
+         return pCat === 'kids wear' || pCat === 'kids';
+      }
+      if (target === 'mens innerwear' || target === 'innerwear') {
+         return pCat === 'mens innerwear' || pCat === 'innerwear';
+      }
+      return pCat === target;
+    });
+  };
+
+  const CATEGORY_TABS = [
+    "Kids Wear", "Mens Innerwear", "Womens Hosiery", "Readymade", 
+    "Winter Wear", "Nightwear", "Socks", "Accessories"
+  ];
 
   return (
     <div className="home-page">
@@ -43,52 +61,45 @@ function Home() {
           ))}
         </div>
       ) : (
-        <div key={activeCategory} className="container sections-container animate-slide-up">
-          {activeCategory === 'All' && forYouProducts.length > 0 && (
+        <div key={activeCategory} className="container sections-container">
+          {activeCategory === 'All' && topPickedProducts.length > 0 && (
             <div className="for-you-section">
-              <ProductSection title="🌟 Handpicked For You" products={forYouProducts} isGridView={false} />
+              <ProductSection title="🌟 Top Picked For You" products={topPickedProducts} isGridView={false} />
             </div>
           )}
           
-          {(activeCategory === 'All' || activeCategory === 'Kids Wear') && kidsProducts.length > 0 && (
-            <div className="deal-of-the-day">
-              <ProductSection 
-                title="Deal of the Day: Kids Wear" 
-                products={kidsProducts} 
-                onViewAll={activeCategory === 'All' ? () => handleCategorySelect('Kids Wear') : null} 
-                isGridView={activeCategory !== 'All'}
-              />
-            </div>
-          )}
-          {(activeCategory === 'All' || activeCategory === 'Mens Innerwear') && innerwearProducts.length > 0 && (
-            <ProductSection 
-              title="Trending in Men's Innerwear" 
-              products={innerwearProducts} 
-              onViewAll={activeCategory === 'All' ? () => handleCategorySelect('Mens Innerwear') : null} 
-              isGridView={activeCategory !== 'All'}
-            />
-          )}
-          {(activeCategory === 'All' || activeCategory === 'Womens Hosiery' || activeCategory === 'Readymade') && ladiesProducts.length > 0 && (
-            <ProductSection 
-              title="Top Picks for Ladies Hosiery & Readymade" 
-              products={ladiesProducts} 
-              onViewAll={activeCategory === 'All' ? () => handleCategorySelect('Womens Hosiery') : null} 
-              isGridView={activeCategory !== 'All'}
-            />
-          )}
-          
-          {/* Dynamic fallback for other categories not hardcoded above */}
-          {activeCategory !== 'All' && 
-           activeCategory !== 'Kids Wear' && 
-           activeCategory !== 'Mens Innerwear' && 
-           activeCategory !== 'Womens Hosiery' && 
-           activeCategory !== 'Readymade' && (
+          {/* If a specific category is selected, just show that category */}
+          {activeCategory !== 'All' && (
             <ProductSection 
               title={`Products in ${activeCategory}`} 
-              products={displayProducts.filter(p => p.category === activeCategory)} 
+              products={getProductsByCategory(activeCategory)} 
               isGridView={true}
             />
           )}
+
+          {/* If 'All' is selected, show grouped rows for all available categories dynamically */}
+          {activeCategory === 'All' && CATEGORY_TABS.map(catName => {
+             const prods = getProductsByCategory(catName);
+             if (prods.length === 0) return null;
+             
+             // Avoid duplicating 'Readymade' if 'Womens Hosiery' already handled it in our group logic
+             if (catName === 'Readymade' && getProductsByCategory('Womens Hosiery').length > 0) return null;
+             
+             let title = `Latest in ${catName}`;
+             if (catName === 'Kids Wear') title = "Deal of the Day: Kids Wear";
+             if (catName === 'Mens Innerwear') title = "Trending in Men's Innerwear";
+             if (catName === 'Womens Hosiery') title = "Top Picks for Ladies Hosiery & Readymade";
+             
+             return (
+               <ProductSection 
+                 key={catName}
+                 title={title} 
+                 products={prods} 
+                 onViewAll={() => handleCategorySelect(catName)} 
+                 isGridView={false}
+               />
+             );
+          })}
         </div>
       )}
     </div>

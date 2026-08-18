@@ -1,16 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-
 :root {
-  --primary-color: #2874f0; /* Flipkart Blue */
-  --primary-hover: #1f5ec2;
-  --secondary-color: #fb641b; /* Flipkart Orange for prominent buttons */
-  --background-gray: #f1f3f6; /* Flipkart background */
-  --text-primary: #212121;
-  --text-secondary: #878787;
-  --border-color: #f0f0f0;
+  /* Premium Modern Palette */
+  --primary-color: #1e3a8a; /* Deep Royal Blue */
+  --primary-hover: #1e40af; /* Lighter Blue */
+  --secondary-color: #f59e0b; /* Amber/Gold */
+  --secondary-hover: #d97706; /* Darker Gold */
+  
+  --background-gray: #f8fafc; /* Slate 50 */
+  --surface-color: #ffffff;
+  
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #64748b; /* Slate 500 */
+  --text-tertiary: #94a3b8; /* Slate 400 */
+  
+  --border-color: #e2e8f0; /* Slate 200 */
+  --border-light: #f1f5f9; /* Slate 100 */
+  
   --white: #ffffff;
   
-  --font-family: 'Roboto', sans-serif;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 15px rgba(79, 70, 229, 0.3);
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --font-family: 'Plus Jakarta Sans', sans-serif;
+  
+  --transition-fast: 0.15s ease-in-out;
+  --transition-normal: 0.3s ease-in-out;
 }
 
 * {
@@ -25,11 +45,13 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
 a {
   text-decoration: none;
   color: inherit;
+  transition: color var(--transition-fast);
 }
 
 button {
@@ -37,12 +59,20 @@ button {
   border: none;
   outline: none;
   font-family: var(--font-family);
+  transition: all var(--transition-fast);
 }
 
 .container {
-  max-width: 1248px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 24px;
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 /* Utilities */
@@ -50,6 +80,7 @@ button {
 .text-secondary { color: var(--text-secondary); }
 .font-bold { font-weight: 700; }
 .font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
 .d-flex { display: flex; }
 .align-center { align-items: center; }
 .justify-between { justify-content: space-between; }
@@ -58,23 +89,60 @@ button {
 
 /* Global components */
 .card {
-  background-color: var(--white);
-  border-radius: 4px;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+  background-color: var(--surface-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
   overflow: hidden;
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .btn-primary {
   background-color: var(--secondary-color);
   color: var(--white);
   padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
-  transition: background-color 0.2s;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  letter-spacing: 0.01em;
 }
 
 .btn-primary:hover {
-  background-color: #e55b19;
+  background-color: var(--secondary-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Skeleton Loader Animation */
+.skeleton-image {
+  background-color: var(--border-color);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-image::after {
+  content: ''; 
+  position: absolute; 
+  top: 0; 
+  left: -100%; 
+  width: 50%; 
+  height: 100%; 
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent); 
+  animation: loading-skeleton 1.5s infinite; 
+}
+
+@keyframes loading-skeleton { 
+  0% { left: -100%; } 
+  100% { left: 200%; } 
 }

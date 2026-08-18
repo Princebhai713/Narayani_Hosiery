@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
-import { DUMMY_PRODUCTS } from '../data/products';
+import ImageLoader from '../components/ImageLoader';
 import './ProductDetail.css';
 
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, cartItems, removeFromCart, updateQuantity } = useCart();
-  const { products: liveProducts } = useProducts();
+  const { products } = useProducts();
   
-  const displayProducts = liveProducts.length > 0 ? liveProducts : DUMMY_PRODUCTS;
-  const product = displayProducts.find(p => p.id === id);
+  const product = products.find(p => p.id === id);
   
   const [activeImg, setActiveImg] = useState(0);
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
@@ -73,12 +72,12 @@ function ProductDetail() {
                 className={`thumbnail ${activeImg === idx ? 'active' : ''}`}
                 onMouseEnter={() => setActiveImg(idx)}
               >
-                <img src={img} alt={`Thumb ${idx}`} />
+                <ImageLoader src={img} alt={`Thumb ${idx}`} />
               </div>
             ))}
           </div>
           <div className="main-image" onClick={() => setIsZoomModalOpen(true)}>
-            <img src={images[activeImg]} alt={product.name} />
+            <ImageLoader src={images[activeImg]} alt={product.name} />
           </div>
         </div>
         

@@ -24,6 +24,16 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+// Auto-migrate to add is_top_picked if missing
+(async () => {
+  try {
+    await pool.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS is_top_picked BOOLEAN DEFAULT false;');
+    console.log('Database auto-migration complete.');
+  } catch (err) {
+    console.error('Migration error (can be ignored if table doesn\'t exist yet):', err.message);
+  }
+})();
+
 // Cloudinary Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -62,6 +72,7 @@ app.get('/api/init-db', async (req, res) => {
         moq INTEGER NOT NULL,
         category VARCHAR(100),
         images JSONB,
+        is_top_picked BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -121,7 +132,7 @@ app.get('/api/products', async (req, res) => {
 // POST new product (Admin)
 app.post('/api/products', upload.array('images', 5), async (req, res) => {
   try {
-    const { name, description, net_rate, moq, category } = req.body;
+    const { name, description, net_rate, moq, category, is_top_picked } = req.body;
     let imageUrls = [];
     
     // Automatically generate a unique product ID (e.g. NH-1698203023)
@@ -140,12 +151,12 @@ app.post('/api/products', upload.array('images', 5), async (req, res) => {
     }
 
     const query = `
-      INSERT INTO products (id, name, description, net_rate, moq, category, images)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO products (id, name, description, net_rate, moq, category, images, is_top_picked)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *;
     `;
     const values = [
-      generatedId, name, description, parseFloat(net_rate), parseInt(moq, 10), category, JSON.stringify(imageUrls)
+      generatedId, name, description, parseFloat(net_rate), parseInt(moq, 10), category, JSON.stringify(imageUrls), is_top_picked === 'true' || is_top_picked === true
     ];
 
     const newProduct = await pool.query(query, values);
@@ -160,7 +171,7 @@ app.post('/api/products', upload.array('images', 5), async (req, res) => {
 app.put('/api/products/:id', upload.array('images', 5), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, net_rate, moq, category, existingImages } = req.body;
+    const { name, description, net_rate, moq, category, existingImages, is_top_picked } = req.body;
     let imageUrls = existingImages ? JSON.parse(existingImages) : [];
     
     // Upload new images to Cloudinary if provided
@@ -176,12 +187,12 @@ app.put('/api/products/:id', upload.array('images', 5), async (req, res) => {
 
     const query = `
       UPDATE products 
-      SET name = $1, description = $2, net_rate = $3, moq = $4, category = $5, images = $6
-      WHERE id = $7
+      SET name = $1, description = $2, net_rate = $3, moq = $4, category = $5, images = $6, is_top_picked = $7
+      WHERE id = $8
       RETURNING *;
     `;
     const values = [
-      name, description, parseFloat(net_rate), parseInt(moq, 10), category, JSON.stringify(imageUrls), id
+      name, description, parseFloat(net_rate), parseInt(moq, 10), category, JSON.stringify(imageUrls), is_top_picked === 'true' || is_top_picked === true, id
     ];
 
     const updatedProduct = await pool.query(query, values);
@@ -191,6 +202,31 @@ app.put('/api/products/:id', upload.array('images', 5), async (req, res) => {
     res.json({ success: true, product: updatedProduct.rows[0] });
   } catch (err) {
     console.error('Error updating product:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PATCH update product top-pick status (Admin)
+app.patch('/api/products/:id/top-pick', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_top_picked } = req.body;
+    
+    const query = `
+      UPDATE products 
+      SET is_top_picked = $1
+      WHERE id = $2
+      RETURNING *;
+    `;
+    const values = [is_top_picked === 'true' || is_top_picked === true, id];
+
+    const updatedProduct = await pool.query(query, values);
+    if (updatedProduct.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+    res.json({ success: true, product: updatedProduct.rows[0] });
+  } catch (err) {
+    console.error('Error updating top-pick status:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -315,7 +351,12 @@ app.get('/api/users/:id/orders', async (req, res) => {
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Export the app for Vercel Serverless
+export default app;
+
+// Start Server locally
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}

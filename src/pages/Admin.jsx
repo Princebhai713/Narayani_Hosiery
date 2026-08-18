@@ -24,7 +24,7 @@ function Admin() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/products');
+      const res = await fetch('/api/products');
       const data = await res.json();
       if (data.success) {
         setProducts(data.products);
@@ -36,7 +36,7 @@ function Admin() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/orders');
+      const res = await fetch('/api/orders');
       const data = await res.json();
       if (data.success) {
         setOrders(data.orders);
@@ -116,6 +116,7 @@ function Admin() {
       net_rate: product.net_rate,
       moq: product.moq,
       category: product.category,
+      is_top_picked: product.is_top_picked || false,
       images: [],
       existingImages: parsedImages || []
     });
@@ -133,7 +134,7 @@ function Admin() {
     }
     
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${id}`, {
+      const res = await fetch(`/api/products/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -149,9 +150,28 @@ function Admin() {
     }
   };
 
+  const handleToggleTopPick = async (product) => {
+    try {
+      const res = await fetch(`/api/products/${product.id}/top-pick`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_top_picked: !product.is_top_picked })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchProducts(); // Refresh list to reflect changes
+      } else {
+        alert("Failed to update top pick: " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error updating top pick");
+    }
+  };
+
   const cancelEdit = () => {
     setEditingProductId(null);
-    setFormData({ name: '', description: '', net_rate: '', moq: '', category: 'Kids Wear', images: [], existingImages: [] });
+    setFormData({ name: '', description: '', net_rate: '', moq: '', category: 'Kids Wear', is_top_picked: false, images: [], existingImages: [] });
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     setPreviewUrls([]);
   };
@@ -166,6 +186,7 @@ function Admin() {
     form.append('net_rate', formData.net_rate);
     form.append('moq', formData.moq);
     form.append('category', formData.category);
+    form.append('is_top_picked', formData.is_top_picked);
     
     if (editingProductId) {
       form.append('existingImages', JSON.stringify(formData.existingImages));
@@ -178,8 +199,8 @@ function Admin() {
     }
 
     const url = editingProductId 
-      ? `http://localhost:5000/api/products/${editingProductId}` 
-      : 'http://localhost:5000/api/products';
+      ? `/api/products/${editingProductId}` 
+      : '/api/products';
       
     const method = editingProductId ? 'PUT' : 'POST';
 
@@ -208,6 +229,7 @@ function Admin() {
         <h2>Admin Panel</h2>
         <ul>
           <li className={activeTab === 'products' ? 'active' : ''} onClick={() => setActiveTab('products')}>Products</li>
+          <li className={activeTab === 'top_picks' ? 'active' : ''} onClick={() => setActiveTab('top_picks')}>Manage Top Picks</li>
           <li className={activeTab === 'orders' ? 'active' : ''} onClick={() => setActiveTab('orders')}>Orders & Export</li>
         </ul>
       </div>
@@ -220,7 +242,7 @@ function Admin() {
               <div className="form-row">
                 <input type="text" name="name" placeholder="Product Name" value={formData.name} onChange={handleInputChange} required style={{width: '100%'}} />
               </div>
-              <textarea name="description" placeholder="Description" rows="3" value={formData.description} onChange={handleInputChange}></textarea>
+             
               <div className="form-row">
                 <input type="number" name="net_rate" placeholder="Wholesale Net Rate (₹)" value={formData.net_rate} onChange={handleInputChange} required />
                 <input type="number" name="moq" placeholder="Minimum Order Quantity (MOQ)" value={formData.moq} onChange={handleInputChange} required />
@@ -234,6 +256,10 @@ function Admin() {
                   <option value="Socks">Socks</option>
                   <option value="Accessories">Accessories</option>
                 </select>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500' }}>
+                  <input type="checkbox" name="is_top_picked" checked={formData.is_top_picked || false} onChange={(e) => setFormData({...formData, is_top_picked: e.target.checked})} />
+                  🌟 Top Picked
+                </label>
               </div>
               
               <div style={{marginTop: '16px', marginBottom: '16px'}}>
@@ -322,6 +348,64 @@ function Admin() {
                   )
                 })}
                 {products.length === 0 && <tr><td colSpan="7">No products found in Neon Database. Add some above!</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'top_picks' && (
+          <div>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+              <h3>Manage Top Picks</h3>
+              <span style={{padding: '8px 16px', background: '#e0e7ff', color: '#3730a3', borderRadius: '8px', fontWeight: 'bold'}}>
+                Currently Showing: {products.filter(p => p.is_top_picked).length} Top Picked Products
+              </span>
+            </div>
+            
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>🌟 Top Picked Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map(p => {
+                  const images = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+                  return (
+                    <tr key={p.id}>
+                      <td><img src={images?.[0]} alt={p.name} width="50" height="50" style={{objectFit: 'contain'}} /></td>
+                      <td>{p.id}</td>
+                      <td>{p.name}</td>
+                      <td>{p.category}</td>
+                      <td>
+                        <button 
+                          onClick={() => handleToggleTopPick(p)}
+                          style={{
+                            padding: '8px 16px',
+                            background: p.is_top_picked ? '#ffeb3b' : '#f1f5f9',
+                            color: p.is_top_picked ? '#000' : '#64748b',
+                            border: '1px solid',
+                            borderColor: p.is_top_picked ? '#fbc02d' : '#cbd5e1',
+                            borderRadius: '24px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {p.is_top_picked ? '🌟 Top Picked (ON)' : '☆ Set as Top Pick'}
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {products.length === 0 && <tr><td colSpan="5">No products found.</td></tr>}
               </tbody>
             </table>
           </div>
