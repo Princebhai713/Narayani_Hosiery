@@ -22,17 +22,10 @@ app.use(express.json());
 const { Pool } = pg;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis: 5000, // Fail fast if DB is unreachable
 });
 
-// Auto-migrate to add is_top_picked if missing
-(async () => {
-  try {
-    await pool.query('ALTER TABLE products ADD COLUMN IF NOT EXISTS is_top_picked BOOLEAN DEFAULT false;');
-    console.log('Database auto-migration complete.');
-  } catch (err) {
-    console.error('Migration error (can be ignored if table doesn\'t exist yet):', err.message);
-  }
-})();
+
 
 // Cloudinary Configuration
 cloudinary.config({
