@@ -286,7 +286,7 @@
     font-size: 14px;
   }
   
-  .cart-btn span {
+  .cart-btn > span:not(.cart-icon-wrapper) {
     display: none;
   }
 }

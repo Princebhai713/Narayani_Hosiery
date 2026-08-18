@@ -159,22 +159,22 @@ function Profile() {
               <form onSubmit={handleSaveProfile} className="profile-form">
                 
                 <div className="floating-input-group">
-                  <input type="text" name="name" className="floating-input" value={formData.name} onChange={handleInputChange} required />
+                  <input type="text" name="name" className="floating-input" value={formData.name} onChange={handleInputChange} placeholder=" " required />
                   <label className="floating-label">Full Name / Shop Name</label>
                 </div>
                 
                 <div className="floating-input-group" style={{marginTop: '24px'}}>
-                  <input type="tel" name="phone" className="floating-input" value={formData.phone} disabled style={{backgroundColor: '#f1f3f6'}} />
+                  <input type="tel" name="phone" className="floating-input" value={formData.phone} placeholder=" " disabled style={{backgroundColor: '#f1f3f6'}} />
                   <label className="floating-label">Phone Number (Verified)</label>
                 </div>
 
                 <div className="floating-input-group" style={{marginTop: '24px'}}>
-                  <input type="text" name="gstin" className="floating-input" value={formData.gstin} onChange={handleInputChange} />
+                  <input type="text" name="gstin" className="floating-input" value={formData.gstin} placeholder=" " onChange={handleInputChange} />
                   <label className="floating-label">GSTIN (Optional)</label>
                 </div>
 
                 <div className="floating-input-group" style={{marginTop: '24px'}}>
-                  <textarea name="address" className="floating-input" value={formData.address} onChange={handleInputChange} rows="3" required></textarea>
+                  <textarea name="address" className="floating-input" value={formData.address} onChange={handleInputChange} placeholder=" " rows="3" required></textarea>
                   <label className="floating-label">Complete Delivery Address</label>
                 </div>
 
