@@ -35,7 +35,7 @@ cloudinary.config({
 });
 
 // Multer setup for file uploads (temporary storage before Cloudinary)
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: '/tmp/' });
 
 // Test DB Connection Route
 app.get('/api/test-db', async (req, res) => {

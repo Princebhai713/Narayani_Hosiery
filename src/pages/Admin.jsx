@@ -236,7 +236,7 @@ function Admin() {
 
       <div className="admin-main">
         {activeTab === 'products' && (
-          <div>
+          <div key="products" className="animate-slide-up">
             <h3>{editingProductId ? 'Edit Product' : 'Add New Product'}</h3>
             <form className="admin-form card" onSubmit={handleSubmit}>
               <div className="form-row">
@@ -354,7 +354,7 @@ function Admin() {
         )}
 
         {activeTab === 'top_picks' && (
-          <div>
+          <div key="top_picks" className="animate-slide-up">
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
               <h3>Manage Top Picks</h3>
               <span style={{padding: '8px 16px', background: '#e0e7ff', color: '#3730a3', borderRadius: '8px', fontWeight: 'bold'}}>
@@ -412,7 +412,7 @@ function Admin() {
         )}
 
         {activeTab === 'orders' && (
-          <div>
+          <div key="orders" className="animate-slide-up">
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
               <h3>Orders Dashboard ({orders.length})</h3>
               <button className="btn-primary" style={{backgroundColor: '#388e3c'}}>Export to Marg ERP (CSV)</button>

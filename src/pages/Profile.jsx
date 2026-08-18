@@ -109,7 +109,7 @@ function Profile() {
         <div className="profile-content">
           
           {activeTab === 'orders' && (
-            <div className="orders-section card">
+            <div key="orders" className="orders-section card animate-slide-up">
               <h2 style={{padding: '24px', borderBottom: '1px solid var(--border-color)'}}>My Orders</h2>
               <div className="orders-list">
                 {loadingOrders ? (
@@ -154,7 +154,7 @@ function Profile() {
           )}
 
           {activeTab === 'details' && (
-            <div className="details-section card">
+            <div key="details" className="details-section card animate-slide-up">
               <h2 style={{padding: '24px', borderBottom: '1px solid var(--border-color)'}}>Business Information</h2>
               <form onSubmit={handleSaveProfile} className="profile-form">
                 

@@ -61,7 +61,7 @@ function Home() {
           ))}
         </div>
       ) : (
-        <div key={activeCategory} className="container sections-container">
+        <div key={activeCategory} className="container sections-container animate-slide-up">
           {activeCategory === 'All' && topPickedProducts.length > 0 && (
             <div className="for-you-section">
               <ProductSection title="🌟 Top Picked For You" products={topPickedProducts} isGridView={false} />
