@@ -35,7 +35,12 @@ function Login() {
         if (data.success) {
           login(data.user);
           triggerToast("Logged in successfully!");
-          navigate('/');
+          
+          if (!data.user.name || data.user.name === 'Guest' || !data.user.address) {
+            navigate('/profile?onboard=true');
+          } else {
+            navigate('/');
+          }
         } else {
           alert(data.error);
         }

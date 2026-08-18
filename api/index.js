@@ -314,11 +314,11 @@ app.post('/api/auth/login', async (req, res) => {
 app.put('/api/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, gstin, address } = req.body;
+    const { name, shop_name, gstin, address } = req.body;
     
     const result = await pool.query(
-      'UPDATE users SET name = $1, gstin = $2, address = $3 WHERE id = $4 RETURNING *',
-      [name, gstin, address, id]
+      'UPDATE users SET name = $1, shop_name = $2, gstin = $3, address = $4 WHERE id = $5 RETURNING *',
+      [name, shop_name, gstin, address, id]
     );
     
     if (result.rows.length === 0) {
@@ -344,8 +344,21 @@ app.get('/api/users/:id/orders', async (req, res) => {
   }
 });
 
-// Export the app for Vercel Serverless
-export default app;
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
+});
+
+// Export the app for Vercel Serverless with a defensive wrapper
+export default (req, res) => {
+  try {
+    app(req, res);
+  } catch (err) {
+    console.error('CRITICAL VERCEL CRASH:', err);
+    res.status(500).json({ success: false, error: 'CRITICAL CRASH: ' + err.message });
+  }
+};
 
 // Start Server locally
 if (process.env.NODE_ENV !== 'production') {

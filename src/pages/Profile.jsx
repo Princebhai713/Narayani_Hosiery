@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Profile.css';
 
 function Profile() {
   const { currentUser, logout, login, isAuthenticated } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnboard = new URLSearchParams(location.search).get('onboard') === 'true';
   
-  const [activeTab, setActiveTab] = useState('orders');
+  const [activeTab, setActiveTab] = useState(isOnboard ? 'details' : 'orders');
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   
@@ -60,6 +62,9 @@ function Profile() {
       if (data.success) {
         login(data.user); // Update context and localStorage
         alert('Profile updated successfully');
+        if (isOnboard) {
+          navigate('/');
+        }
       } else {
         alert(data.error);
       }
@@ -162,6 +167,10 @@ function Profile() {
                   <input type="text" name="name" className="floating-input" value={formData.name} onChange={handleInputChange} placeholder=" " required />
                   <label className="floating-label">Full Name / Shop Name</label>
                 </div>
+                
+                {isOnboard && (
+                  <p style={{fontSize: '12px', color: 'var(--primary-color)', marginTop: '8px'}}>* Required to complete your business profile</p>
+                )}
                 
                 <div className="floating-input-group" style={{marginTop: '24px'}}>
                   <input type="tel" name="phone" className="floating-input" value={formData.phone} placeholder=" " disabled style={{backgroundColor: '#f1f3f6'}} />
