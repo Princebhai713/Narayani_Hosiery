@@ -1,0 +1,151 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 32px 16px;
+  background-color: #f1f3f6;
+}
+
+.login-container {
+  display: flex;
+  width: 100%;
+  max-width: 800px;
+  min-height: 520px;
+  background-color: var(--white);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1);
+}
+
+.login-left {
+  background-color: #2874f0;
+  width: 40%;
+  padding: 40px 32px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-left h2 {
+  font-size: 28px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.login-left p {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #dbe4fd;
+}
+
+.login-illustration {
+  margin-top: auto;
+  text-align: center;
+}
+
+.login-illustration img {
+  max-width: 100%;
+}
+
+.login-right {
+  width: 60%;
+  padding: 56px 36px 36px 36px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.login-form {
+  flex: 1;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.input-group input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 0;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: transparent;
+}
+
+.input-group input:focus {
+  border-bottom: 1px solid #2874f0;
+}
+
+.input-group label {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  font-size: 14px;
+  color: #878787;
+  pointer-events: none;
+  transition: 0.2s ease all;
+}
+
+.input-group input:focus ~ label,
+.input-group label.active {
+  top: -12px;
+  font-size: 12px;
+  color: #2874f0;
+}
+
+.terms-text {
+  font-size: 12px;
+  color: #878787;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.terms-text a {
+  color: #2874f0;
+  text-decoration: none;
+}
+
+.login-submit-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: auto;
+}
+
+.create-account-link {
+  font-size: 14px;
+  color: #2874f0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .login-left {
+    width: 100%;
+    padding: 24px;
+  }
+  
+  .login-illustration {
+    display: none;
+  }
+  
+  .login-right {
+    width: 100%;
+    padding: 32px 24px;
+  }
+}

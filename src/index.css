@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+  --primary-color: #2874f0; /* Flipkart Blue */
+  --primary-hover: #1f5ec2;
+  --secondary-color: #fb641b; /* Flipkart Orange for prominent buttons */
+  --background-gray: #f1f3f6; /* Flipkart background */
+  --text-primary: #212121;
+  --text-secondary: #878787;
+  --border-color: #f0f0f0;
+  --white: #ffffff;
+  
+  --font-family: 'Roboto', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-gray);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: var(--font-family);
+}
+
+.container {
+  max-width: 1248px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Utilities */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.d-flex { display: flex; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.mt-2 { margin-top: 16px; }
+.mb-2 { margin-bottom: 16px; }
+
+/* Global components */
+.card {
+  background-color: var(--white);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.btn-primary {
+  background-color: var(--secondary-color);
+  color: var(--white);
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #e55b19;
+}

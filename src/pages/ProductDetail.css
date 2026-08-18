@@ -1,0 +1,252 @@
+.product-detail-page {
+  padding: 16px;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+}
+
+.breadcrumb a:hover {
+  color: var(--primary-color);
+}
+
+.product-detail-card {
+  display: flex;
+  padding: 24px;
+  gap: 32px;
+}
+
+.product-gallery {
+  display: flex;
+  gap: 16px;
+  width: 45%;
+  min-width: 400px;
+}
+
+.thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.thumbnail {
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.thumbnail.active {
+  border-color: var(--primary-color);
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.main-image {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  cursor: zoom-in;
+  min-height: 400px;
+  max-height: 600px;
+}
+
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-title {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.product-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.price-box {
+  margin-bottom: 24px;
+}
+
+.price-box .net-rate-label {
+  color: #388e3c;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.price-box .net-rate-price {
+  font-size: 32px;
+  margin: 4px 0 12px 0;
+}
+
+.delivery-check {
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+
+.pincode-input-group {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  width: 250px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.pincode-input-group input {
+  border: none;
+  outline: none;
+  padding: 8px 0;
+  flex: 1;
+  font-size: 14px;
+}
+
+.pincode-input-group button {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.delivery-estimate {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.add-to-cart-large {
+  padding: 16px 40px;
+  font-size: 18px;
+  background-color: #ff9f00; /* Flipkart yellow */
+  flex: 1;
+}
+
+.add-to-cart-large:hover {
+  background-color: #e58f00;
+}
+
+.buy-now-large {
+  padding: 16px 40px;
+  font-size: 18px;
+  background-color: #fb641b; /* Flipkart orange */
+  flex: 1;
+}
+
+.buy-now-large:hover {
+  background-color: #e05512;
+}
+
+.strict-policy {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--background-gray);
+  padding: 12px;
+  border-radius: 4px;
+}
+
+/* Zoom Modal Styles */
+.image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.9);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  z-index: 2010;
+}
+
+.zoom-controls {
+  position: absolute;
+  bottom: 32px;
+  display: flex;
+  gap: 16px;
+  z-index: 2010;
+}
+
+.zoom-controls button {
+  background-color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.image-modal-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto; /* allows scrolling when zoomed in */
+}
+
+.image-modal-content img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  cursor: zoom-in;
+}
+
+@media (max-width: 768px) {
+  .product-detail-card {
+    flex-direction: column;
+    padding: 16px;
+  }
+  
+  .product-gallery {
+    width: 100%;
+    min-width: unset;
+    flex-direction: column-reverse;
+  }
+  
+  .thumbnails {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}

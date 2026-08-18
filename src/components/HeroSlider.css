@@ -1,0 +1,43 @@
+.hero-slider {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+  background-color: var(--white);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  margin-bottom: 12px;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.slider-image {
+  min-width: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.slider-dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.dot.active {
+  background-color: white;
+  transform: scale(1.2);
+}
