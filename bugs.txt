@@ -1,4 +1,0 @@
-1. search button kam nahi ker raha hai 
-2. catogary kam nahi ker raha hai 
-3. view button kam nahiker raha hai 
-4. admin ki features kam to ker raha hai lekin database mai data save nahi ho raha hai aur 
