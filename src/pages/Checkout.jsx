@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Checkout.css';
 
 function Checkout() {
   const { cartItems, clearCart, updateQuantity, removeFromCart, isAuthenticated, currentUser, login } = useCart(); 
-  const [loginStep, setLoginStep] = useState(1); 
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeStep, setActiveStep] = useState(1);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [addressData, setAddressData] = useState({
@@ -12,6 +14,28 @@ function Checkout() {
     phone: currentUser?.phone || '',
     address: currentUser?.address || ''
   });
+  const [showGstModal, setShowGstModal] = useState(false);
+  const [gstModalStep, setGstModalStep] = useState(1);
+  const [gstInput, setGstInput] = useState('');
+  const [shopNameInput, setShopNameInput] = useState(currentUser?.shop_name || '');
+  const [savingGst, setSavingGst] = useState(false);
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+
+  // Parse saved addresses safely
+  let savedAddresses = [];
+  if (currentUser?.saved_addresses) {
+    savedAddresses = typeof currentUser.saved_addresses === 'string' 
+      ? JSON.parse(currentUser.saved_addresses) 
+      : currentUser.saved_addresses;
+  }
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+    } else if (currentUser?.address && currentUser?.name && activeStep === 1) {
+      setActiveStep(2);
+    }
+  }, [currentUser, isAuthenticated, navigate, location, activeStep]);
 
   const totalBaseNet = cartItems.reduce((acc, item) => acc + (item.netRate * item.quantity), 0);
   const totalGST = totalBaseNet * 0.05;
@@ -43,8 +67,13 @@ function Checkout() {
   }
 
   const handleContinue = async () => {
-    if (activeStep === 2) setActiveStep(3);
-    else if (activeStep === 3) {
+    if (activeStep === 2) {
+      if (currentUser && !currentUser.gstin) {
+        setShowGstModal(true);
+      } else {
+        setActiveStep(3);
+      }
+    } else if (activeStep === 3) {
       try {
         const orderData = {
           userId: currentUser.id, // Using actual logged-in user
@@ -78,91 +107,134 @@ function Checkout() {
     }
   };
 
-  const renderLoginModal = () => (
+
+
+  const renderGstModal = () => (
     <div className="modal-overlay">
       <div className="flipkart-login-modal">
-        <button className="modal-close-btn" onClick={() => window.history.back()}>✕</button>
+        <button className="modal-close-btn" onClick={() => setShowGstModal(false)}>✕</button>
         
         <div className="login-left-pane">
-          <span className="login-heading">Login</span>
-          <p className="login-subheading">Get access to B2B Wholesale Rates, Orders, and faster checkout</p>
+          <span className="login-heading">Business Details</span>
+          <p className="login-subheading">Adding your business details helps us provide a better wholesale experience and allows you to claim Input Tax Credit.</p>
           <div className="login-illustration">
-            <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/login_img_c4a81e.png" alt="Login" />
+            <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/login_img_c4a81e.png" alt="Business Details" />
           </div>
         </div>
 
         <div className="login-right-pane">
-          {loginStep === 1 && (
+          {gstModalStep === 1 && (
             <div className="login-form-content">
               <h3 style={{marginBottom: '24px', fontSize: '14px', color: '#878787'}}>Select Business Type</h3>
-              <button className="btn-b2b-option" onClick={() => setLoginStep(2)}>I have a GSTIN (GST Business)</button>
-              <button className="btn-b2b-option" onClick={() => setLoginStep(3)}>I don't have a GSTIN (Upload ID)</button>
-              <div className="terms-text">By continuing, you agree to Narayani Hosiery's Terms of Use and Privacy Policy.</div>
+              <button className="btn-b2b-option" onClick={() => setGstModalStep(2)}>I have a GSTIN (GST Business)</button>
+              <button className="btn-b2b-option" onClick={() => setGstModalStep(3)}>I don't have a GSTIN (Shop Name)</button>
+              <div className="terms-text">By continuing, you agree to Narayani Hosiery's Terms of Use.</div>
             </div>
           )}
 
-          {loginStep === 2 && (
+          {gstModalStep === 2 && (
             <div className="login-form-content">
               <div className="floating-input-group">
-                <input type="text" className="floating-input" required />
+                <input 
+                  type="text" 
+                  className="floating-input" 
+                  required 
+                  value={gstInput}
+                  onChange={(e) => setGstInput(e.target.value)}
+                />
                 <label className="floating-label">Enter 15-digit GSTIN</label>
               </div>
-              <div className="floating-input-group" style={{marginTop: '24px'}}>
-                <input type="tel" className="floating-input" required />
-                <label className="floating-label">Enter Mobile Number</label>
-              </div>
-              <div className="terms-text">By continuing, you agree to Narayani Hosiery's Terms of Use and Privacy Policy.</div>
-              <button className="btn-request-otp" onClick={() => setLoginStep(4)}>Request OTP</button>
-              <button className="btn-back-link" onClick={() => setLoginStep(1)}>Go Back</button>
+              <div className="terms-text">By continuing, you agree to Narayani Hosiery's Terms of Use.</div>
+              <button 
+                className="btn-request-otp" 
+                style={{marginTop: '24px'}}
+                disabled={savingGst || gstInput.length < 15}
+                onClick={async () => {
+                  setSavingGst(true);
+                  try {
+                    const res = await fetch(`/api/users/${currentUser.id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ ...currentUser, gstin: gstInput })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      login(data.user);
+                      setShowGstModal(false);
+                      setActiveStep(3);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setSavingGst(false);
+                  }
+                }}
+              >
+                {savingGst ? 'Saving...' : 'Save GST & Continue'}
+              </button>
+              <button className="btn-back-link" onClick={() => setGstModalStep(1)}>Go Back</button>
             </div>
           )}
 
-          {loginStep === 3 && (
+          {gstModalStep === 3 && (
             <div className="login-form-content">
               <div className="floating-input-group">
-                <input type="text" className="floating-input" required />
+                <input 
+                  type="text" 
+                  className="floating-input" 
+                  required 
+                  value={shopNameInput}
+                  onChange={(e) => setShopNameInput(e.target.value)}
+                />
                 <label className="floating-label">Business / Shop Name</label>
-              </div>
-              <div className="floating-input-group" style={{marginTop: '24px'}}>
-                <input type="tel" className="floating-input" required />
-                <label className="floating-label">Enter Mobile Number</label>
               </div>
               <div className="upload-box-fk" style={{marginTop: '24px'}}>
                 <label>Upload Aadhar / Trade License</label>
                 <input type="file" />
               </div>
-              <div className="terms-text" style={{marginTop: '24px'}}>By continuing, you agree to Narayani Hosiery's Terms of Use and Privacy Policy.</div>
-              <button className="btn-request-otp" onClick={() => setLoginStep(4)}>Request OTP</button>
-              <button className="btn-back-link" onClick={() => setLoginStep(1)}>Go Back</button>
-            </div>
-          )}
-
-          {loginStep === 4 && (
-            <div className="login-form-content text-center">
-              <h3 style={{marginBottom: '16px', fontSize: '14px', color: '#878787'}}>Please enter the OTP sent to your number</h3>
-              <div className="floating-input-group">
-                <input type="text" className="floating-input" style={{textAlign: 'center', letterSpacing: '4px', fontSize: '18px'}} maxLength="6" required />
-                <label className="floating-label" style={{left: '50%', transform: 'translateX(-50%)'}}>Enter OTP</label>
-              </div>
-              <button className="btn-request-otp" style={{marginTop: '24px'}} onClick={() => {
-                // Not fully functional from here since it's just a dummy login step,
-                // but let's navigate to /login if they click this in the mock modal
-                window.location.href = '/login';
-              }}>Go to Login</button>
-              <button className="btn-back-link" onClick={() => setLoginStep(1)}>Change Method</button>
+              <div className="terms-text" style={{marginTop: '24px'}}>By continuing, you agree to Narayani Hosiery's Terms of Use.</div>
+              <button 
+                className="btn-request-otp" 
+                style={{marginTop: '24px'}}
+                disabled={savingGst || shopNameInput.length < 3}
+                onClick={async () => {
+                  setSavingGst(true);
+                  try {
+                    const res = await fetch(`/api/users/${currentUser.id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ ...currentUser, shop_name: shopNameInput, gstin: 'NO_GST' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      login(data.user);
+                      setShowGstModal(false);
+                      setActiveStep(3);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setSavingGst(false);
+                  }
+                }}
+              >
+                {savingGst ? 'Saving...' : 'Save & Continue'}
+              </button>
+              <button className="btn-back-link" onClick={() => setGstModalStep(1)}>Go Back</button>
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
 
+  if (!isAuthenticated) return null; // Wait for redirect
+
   return (
     <div className="checkout-page container">
-      {!isAuthenticated && renderLoginModal()}
+      {showGstModal && renderGstModal()}
       
-      <div className={`checkout-content ${!isAuthenticated ? 'blurred' : ''}`}>
+      <div className={`checkout-content ${showGstModal ? 'blurred' : ''}`}>
         
         <div className="checkout-main">
           
@@ -189,9 +261,22 @@ function Checkout() {
               <h3 style={{marginBottom: '16px', color: 'var(--primary-color)'}}>Delivery Address</h3>
               <form 
                 style={{display: 'flex', flexDirection: 'column', gap: '16px'}}
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   if (addressData.name && addressData.phone && addressData.address) {
+                    try {
+                      const res = await fetch(`/api/users/${currentUser.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...currentUser, name: addressData.name, address: addressData.address })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        login(data.user);
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
                     setActiveStep(2);
                   } else {
                     alert('Please fill out all address fields');
@@ -200,7 +285,38 @@ function Checkout() {
               >
                 <input type="text" placeholder="Full Name (e.g. Shop Name or Your Name)" required value={addressData.name} onChange={e => setAddressData({...addressData, name: e.target.value})} className="input-field" style={{marginBottom: '0'}} />
                 <input type="tel" placeholder="Phone Number" required value={addressData.phone} onChange={e => setAddressData({...addressData, phone: e.target.value})} className="input-field" style={{marginBottom: '0'}} />
-                <textarea placeholder="Complete Delivery Address (with Pincode)" required value={addressData.address} onChange={e => setAddressData({...addressData, address: e.target.value})} className="input-field" rows="3" style={{marginBottom: '0'}}></textarea>
+                
+                <div className="address-autocomplete-wrapper">
+                  <textarea 
+                    placeholder="Complete Delivery Address (with Pincode)" 
+                    required 
+                    value={addressData.address} 
+                    onChange={e => setAddressData({...addressData, address: e.target.value})} 
+                    onFocus={() => setShowAddressDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowAddressDropdown(false), 200)}
+                    className="input-field" 
+                    rows="3" 
+                    style={{marginBottom: '0'}}
+                  ></textarea>
+                  {showAddressDropdown && savedAddresses.length > 0 && (
+                    <div className="address-dropdown">
+                      {savedAddresses.map((addr, idx) => (
+                        <div 
+                          key={idx} 
+                          className="address-suggestion-item"
+                          onClick={() => {
+                            setAddressData({...addressData, address: addr});
+                            setShowAddressDropdown(false);
+                          }}
+                        >
+                          <strong>Recommended Address</strong>
+                          {addr}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <button type="submit" className="btn-primary" style={{alignSelf: 'flex-start'}}>Save and Deliver Here</button>
               </form>
             </div>

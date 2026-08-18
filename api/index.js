@@ -79,8 +79,15 @@ app.get('/api/init-db', async (req, res) => {
         gstin VARCHAR(15),
         shop_name VARCHAR(255),
         address TEXT,
+        saved_addresses JSONB DEFAULT '[]'::jsonb,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // Alter table for existing users
+    await client.query(`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS saved_addresses JSONB DEFAULT '[]'::jsonb;
     `);
 
     // Orders Table
@@ -316,9 +323,30 @@ app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
     const { name, shop_name, gstin, address } = req.body;
     
+    // First fetch current user to get saved_addresses
+    const userRes = await pool.query('SELECT saved_addresses FROM users WHERE id = $1', [id]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    
+    let savedAddresses = userRes.rows[0].saved_addresses || [];
+    if (typeof savedAddresses === 'string') {
+      try { savedAddresses = JSON.parse(savedAddresses); } catch (e) { savedAddresses = []; }
+    }
+    
+    if (address && address.trim() !== '') {
+      // Remove it if it exists to bring it to the top
+      savedAddresses = savedAddresses.filter(a => a.toLowerCase().trim() !== address.toLowerCase().trim());
+      savedAddresses.unshift(address.trim());
+      // Keep only last 5 addresses
+      if (savedAddresses.length > 5) {
+        savedAddresses = savedAddresses.slice(0, 5);
+      }
+    }
+
     const result = await pool.query(
-      'UPDATE users SET name = $1, shop_name = $2, gstin = $3, address = $4 WHERE id = $5 RETURNING *',
-      [name, shop_name, gstin, address, id]
+      'UPDATE users SET name = $1, shop_name = $2, gstin = $3, address = $4, saved_addresses = $5 WHERE id = $6 RETURNING *',
+      [name, shop_name, gstin, address, JSON.stringify(savedAddresses), id]
     );
     
     if (result.rows.length === 0) {

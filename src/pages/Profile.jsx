@@ -7,7 +7,9 @@ function Profile() {
   const { currentUser, logout, login, isAuthenticated } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-  const isOnboard = new URLSearchParams(location.search).get('onboard') === 'true';
+  const searchParams = new URLSearchParams(location.search);
+  const isOnboard = searchParams.get('onboard') === 'true';
+  const redirectUrl = searchParams.get('redirect') || '/';
   
   const [activeTab, setActiveTab] = useState(isOnboard ? 'details' : 'orders');
   const [orders, setOrders] = useState([]);
@@ -20,6 +22,15 @@ function Profile() {
     address: currentUser?.address || ''
   });
   const [saving, setSaving] = useState(false);
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+
+  // Parse saved addresses safely
+  let savedAddresses = [];
+  if (currentUser?.saved_addresses) {
+    savedAddresses = typeof currentUser.saved_addresses === 'string' 
+      ? JSON.parse(currentUser.saved_addresses) 
+      : currentUser.saved_addresses;
+  }
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -63,7 +74,7 @@ function Profile() {
         login(data.user); // Update context and localStorage
         alert('Profile updated successfully');
         if (isOnboard) {
-          navigate('/');
+          navigate(redirectUrl);
         }
       } else {
         alert(data.error);
@@ -178,12 +189,41 @@ function Profile() {
                 </div>
 
                 <div className="floating-input-group" style={{marginTop: '24px'}}>
-                  <input type="text" name="gstin" className="floating-input" value={formData.gstin} placeholder=" " onChange={handleInputChange} />
+                  <input type="text" name="gstin" className="floating-input" value={formData.gstin === 'NO_GST' ? '' : formData.gstin} placeholder=" " onChange={handleInputChange} />
                   <label className="floating-label">GSTIN (Optional)</label>
                 </div>
 
                 <div className="floating-input-group" style={{marginTop: '24px'}}>
-                  <textarea name="address" className="floating-input" value={formData.address} onChange={handleInputChange} placeholder=" " rows="3" required></textarea>
+                  <div className="address-autocomplete-wrapper">
+                    <textarea 
+                      name="address" 
+                      className="floating-input" 
+                      value={formData.address} 
+                      onChange={handleInputChange} 
+                      onFocus={() => setShowAddressDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowAddressDropdown(false), 200)}
+                      placeholder=" " 
+                      rows="3" 
+                      required
+                    ></textarea>
+                    {showAddressDropdown && savedAddresses.length > 0 && (
+                      <div className="address-dropdown">
+                        {savedAddresses.map((addr, idx) => (
+                          <div 
+                            key={idx} 
+                            className="address-suggestion-item"
+                            onClick={() => {
+                              setFormData({...formData, address: addr});
+                              setShowAddressDropdown(false);
+                            }}
+                          >
+                            <strong>Recommended Address</strong>
+                            {addr}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <label className="floating-label">Complete Delivery Address</label>
                 </div>
 

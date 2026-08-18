@@ -309,6 +309,20 @@
   font-size: 24px;
 }
 
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Flipkart Style Login Modal */
 .flipkart-login-modal {
   width: 750px;
@@ -476,6 +490,50 @@
 
 .upload-box-fk input {
   font-size: 12px;
+}
+
+/* Autocomplete Address Dropdown */
+.address-autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.address-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 0 0 4px 4px;
+}
+
+.address-suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #212121;
+}
+
+.address-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.address-suggestion-item:hover {
+  background-color: #f5faff;
+}
+
+.address-suggestion-item strong {
+  display: block;
+  font-size: 12px;
+  color: #878787;
+  margin-bottom: 4px;
 }
 
 @media (max-width: 768px) {
