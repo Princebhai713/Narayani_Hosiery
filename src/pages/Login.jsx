@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Login.css';
 
@@ -8,6 +8,8 @@ function Login() {
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/';
   const { login, triggerToast } = useCart();
   const [loading, setLoading] = useState(false);
 
@@ -37,9 +39,9 @@ function Login() {
           triggerToast("Logged in successfully!");
           
           if (!data.user.name || data.user.name === 'Guest' || !data.user.address) {
-            navigate('/profile?onboard=true');
+            navigate(`/profile?onboard=true&redirect=${encodeURIComponent(redirectUrl)}`);
           } else {
-            navigate('/');
+            navigate(redirectUrl);
           }
         } else {
           alert(data.error);

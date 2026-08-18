@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useCart } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ImageLoader from './ImageLoader';
 import './ProductSection.css';
 
@@ -12,6 +12,13 @@ const optimizeCloudinaryUrl = (url) => {
 function ProductSection({ title, products, onViewAll, isGridView }) {
   const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleCardClick = (e, id, slug) => {
+    // Prevent navigation if user clicked a button (like Add to Cart) or a Link
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    navigate(`/product/${id}/${slug}`);
+  };
   
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -42,7 +49,12 @@ function ProductSection({ title, products, onViewAll, isGridView }) {
           {products.map(product => {
             const slug = product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             return (
-              <div key={product.id} className="product-card">
+              <div 
+                key={product.id} 
+                className="product-card" 
+                onClick={(e) => handleCardClick(e, product.id, slug)}
+                style={{ cursor: 'pointer' }}
+              >
                 <Link to={`/product/${product.id}/${slug}`} className="product-image">
                   <ImageLoader 
                     src={optimizeCloudinaryUrl(product.images[0])} 

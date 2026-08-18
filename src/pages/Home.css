@@ -35,5 +35,11 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--secondary-color), #818cf8);
+}
+
+@media (max-width: 768px) {
+  .sections-container {
+    gap: 12px;
+    margin-top: 12px;
+  }
 }
